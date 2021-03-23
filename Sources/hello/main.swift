@@ -1,6 +1,7 @@
 import SwiftyGPIO
 import Foundation
 import Glibc
+import Dispatch
 
 // setup exit sig
 var signalReceived: sig_atomic_t = 0
@@ -113,15 +114,18 @@ btn.onChange{
 }*/
 
 // display
-
-// main loop
-LED.value = 0
-while signalReceived == 0 {
+DispatchQueue.main.async {
     btn.onRaising{
         gpio in
         print("btn pressed")
         digitDisplay.increment()
-    }
+    }    
+}
+
+// main loop
+LED.value = 0
+while signalReceived == 0 {
+
     //print("set LED to 1")
     LED.value = 1
     //print("LED current val: " + String(LED.value))
