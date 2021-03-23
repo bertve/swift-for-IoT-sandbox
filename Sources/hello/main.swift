@@ -113,19 +113,19 @@ btn.onChange{
     print("btn value changed, current val: " + String(gpio.value))
 }*/
 
-// display
-DispatchQueue.main.async {
-    btn.onRaising{
-        gpio in
-        print("btn pressed")
-        digitDisplay.increment()
-    }    
-}
+btn.onRaising{
+    gpio in
+    print("btn pressed")
+    digitDisplay.stopDisplaying()
+    //DispatchQueue.global(qos: .userInitiated).async {
+    digitDisplay.increment()
+    digitDisplay.display()
+    //}
+}   
 
 // main loop
 LED.value = 0
 while signalReceived == 0 {
-
     //print("set LED to 1")
     LED.value = 1
     //print("LED current val: " + String(LED.value))
@@ -138,7 +138,6 @@ while signalReceived == 0 {
 
 // cleanup
 LED.direction = .IN
-btn.clearListeners()
 digitDisplay.stopDisplaying()
 print("\ncompleted cleanup of GPIO resources.")
 exit(signalReceived)

@@ -6,7 +6,7 @@ class DigitDisplay {
     let gpios: [GPIO]
     var currentlyDisplayedNumber = 0 {  
         didSet {
-            self.display(currentlyDisplayedNumber)
+            self.determineSequence(currentlyDisplayedNumber)
         }
     }
 
@@ -17,7 +17,7 @@ class DigitDisplay {
         0: [1,1,0,1,0,1,1,1,1,1,1,1],
         1: [0,0,0,1,0,1,1,1,1,0,0,1],
         2: [1,1,0,0,1,1,1,1,1,0,1,1],
-        3: [1,1,0,1,1,1,1,1,1,0,0,1],
+        3: [1,1,0,0,1,1,0,1,1,1,1,1],
         4: [0,0,0,1,1,1,1,1,1,1,0,1],
         5: [0,1,0,1,1,1,0,1,1,1,1,1],
         6: [1,1,0,1,1,1,0,1,1,1,1,1],
@@ -47,35 +47,29 @@ class DigitDisplay {
         currentlyDisplayedNumber -= 1
     }
 
+    func display() {
+        print("display \(currentlyDisplayedNumber)")
+        for seq in displaySequences {
+            var seqIndex = 0
+            for gpio in gpios {
+                gpio.value = seq[seqIndex]
+                seqIndex += 1
+            }
+            usleep(2000)
+        }
+    
+    }
+
     func stopDisplaying() {
         self.isDisplaying = false
     }
 
-    private func display(_ number: Int){
-        guard number >= 0 && number <= 9999 else {
+    private func determineSequence(_ num: Int) {
+        guard num >= 0 && num <= 9999 else {
             reset()
             return 
         }
-
-        print("display: \(number)")
         
-        self.isDisplaying = true
-        self.determineSequence(number)
-
-        while isDisplaying {
-            for seq in displaySequences {
-                var seqIndex = 0
-                for gpio in gpios {
-                    gpio.value = seq[seqIndex]
-                    seqIndex += 1
-                }
-                usleep(2000)
-            }
-        }
-        print("display stopped")
-    }
-
-    private func determineSequence(_ num: Int) {
         self.displaySequences = []  
         var number = num
         var digit : Int
