@@ -9,16 +9,12 @@ signal(SIGINT) { signal in
     signalReceived = signal
 }
 
-signal(SIGINT) { signal in
-    signalReceived = signal
-}
-
 // welcome 
-print("--------------------------")
-print("--+++++-++++---+++-+++++--")
-print("----+---+++----+-----+----")
-print("----+---++++-+++-----+----")
-print("--------------------------")
+print("---------------------------")
+print("--+++++-++++---++++-+++++--")
+print("----+---+++----++-----+----")
+print("----+---++++-++++-----+----")
+print("---------------------------")
 print("")
 print("Press CTRL_C to exit.")
 
@@ -36,53 +32,109 @@ let gpios = SwiftyGPIO.GPIOs(for: .RaspberryPi4)
 // iterate gpios
 /*gpios.compactMap({ $0 })
     .forEach { print($0) }*/
-guard let targetGP = gpios[.P3] else {
+
+// LED
+guard let LED = gpios[.P21] else {
     fatalError("Could not init target gpio")
 }
-targetGP.direction = .OUT
+LED.direction = .OUT
+
+// Button
+guard let btn = gpios[.P20] else {
+    fatalError("Could not init target gpio")
+}
+btn.direction = .IN
 //debounce time: garantees that there wil be only 1 transition notified by closures (onraising, onfalling, onchange)
 let debounceTime = 0.5
-targetGP.bounceTime = debounceTime
+btn.bounceTime = debounceTime
+var count = 0
+
+// digit display
+var digitDisplayGPIO = [GPIO]()
+guard let gpioOne = gpios[.P14] else {
+    fatalError("Could not init target 14 gpio")
+}
+digitDisplayGPIO.append(gpioOne)
+guard let gpioTwo = gpios[.P2] else {
+    fatalError("Could not init target 2 gpio")
+}
+digitDisplayGPIO.append(gpioTwo)
+guard let gpioThree = gpios[.P3] else {
+    fatalError("Could not init target 3 gpio")
+}
+digitDisplayGPIO.append(gpioThree)
+guard let gpioFour = gpios[.P4] else {
+    fatalError("Could not init target 4 gpio")
+}
+digitDisplayGPIO.append(gpioFour)
+guard let gpioFive = gpios[.P5] else {
+    fatalError("Could not init target 5 gpio")
+}
+digitDisplayGPIO.append(gpioFive)
+guard let gpioSix = gpios[.P6] else {
+    fatalError("Could not init target 6 gpio")
+}
+digitDisplayGPIO.append(gpioSix)
+guard let gpioSeven = gpios[.P7] else {
+    fatalError("Could not init target 7 gpio")
+}
+digitDisplayGPIO.append(gpioSeven)
+guard let gpioEight = gpios[.P8] else {
+    fatalError("Could not init target 8 gpio")
+}
+digitDisplayGPIO.append(gpioEight)
+guard let gpioNine = gpios[.P9] else {
+    fatalError("Could not init target 9 gpio")
+}
+digitDisplayGPIO.append(gpioNine)
+guard let gpioTen = gpios[.P15] else {
+    fatalError("Could not init target 15 gpio")
+}
+digitDisplayGPIO.append(gpioTen)
+guard let gpioEleven = gpios[.P18] else {
+    fatalError("Could not init target 18 gpio")
+}
+digitDisplayGPIO.append(gpioEleven)
+guard let gpioTwelve = gpios[.P12] else {
+    fatalError("Could not init target 12 gpio")
+}
+digitDisplayGPIO.append(gpioTwelve)
+
+let digitDisplay = DigitDisplay(gpios: digitDisplayGPIO )
 
 /*
-targetGP.onRaising{
-    gpio in
-    print("ONN")
-}
-
-targetGP.onFalling{
+btn.onFalling{
     gpio in 
-    print("OFF")
+    print("btn released")
 }
-
-targetGP.onChange{
+btn.onChange{
     gpio in 
-    print("value changed, current val: " + String(gpio.value))
-}
-*/
-// loop
-targetGP.value = 0
+    print("btn value changed, current val: " + String(gpio.value))
+}*/
+
+// display
+
+// main loop
+LED.value = 0
 while signalReceived == 0 {
-    print("set targetGP to 1")
-    targetGP.value = 1
-    print("current val: " + String(targetGP.value))
-    usleep(5000000)
-    print("set targetGP to 0")
-    targetGP.value = 0
-    print("current val: " + String(targetGP.value))
-    usleep(5000000)
+    btn.onRaising{
+        gpio in
+        print("btn pressed")
+        digitDisplay.increment()
+    }
+    //print("set LED to 1")
+    LED.value = 1
+    //print("LED current val: " + String(LED.value))
+    sleep(1)
+    //print("set LED to 0")
+    LED.value = 0
+    //print("LED current val: " + String(LED.value))
+    sleep(1)
 }
 
 // cleanup
-targetGP.direction = .IN
+LED.direction = .IN
+btn.clearListeners()
+digitDisplay.stopDisplaying()
 print("\ncompleted cleanup of GPIO resources.")
 exit(signalReceived)
-/*
-var n = 1
-while true {
-    print("loop \(n)")
-    targetGP.value = 1//(targetGP.value == 0) ? 1 : 0
-    print("current val: " + String(targetGP.value))
-    sleep(5)
-    n += 1
-}*/
