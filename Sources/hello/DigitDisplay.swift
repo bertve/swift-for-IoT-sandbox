@@ -41,6 +41,7 @@ class DigitDisplay {
 
     func increment(){
         currentlyDisplayedNumber += 1
+        print("currently displayed: \(currentlyDisplayedNumber)")
     }
 
     func decrement(){
@@ -48,7 +49,6 @@ class DigitDisplay {
     }
 
     func display() {
-        print("display \(currentlyDisplayedNumber)")
         for seq in displaySequences {
             var seqIndex = 0
             for gpio in gpios {
@@ -60,9 +60,6 @@ class DigitDisplay {
     
     }
 
-    func stopDisplaying() {
-        self.isDisplaying = false
-    }
 
     private func determineSequence(_ num: Int) {
         guard num >= 0 && num <= 9999 else {
