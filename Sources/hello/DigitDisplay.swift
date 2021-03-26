@@ -3,8 +3,8 @@ import Foundation
 
 class DigitDisplay {
 
-    let gpios: [GPIO]
-    var currentlyDisplayedNumber = 0 {  
+    private let gpios: [GPIO]
+    private var currentlyDisplayedNumber : Int {  
         didSet {
             print("setted display number: \(currentlyDisplayedNumber)")
             self.determineSequence(currentlyDisplayedNumber)
@@ -25,7 +25,9 @@ class DigitDisplay {
         8: [1,1,0,1,1,1,1,1,1,1,1,1],
         9: [0,1,0,1,1,1,1,1,1,1,1,1] 
     ]
- 
+    // pos of gpio in digitseq, set low to activate segment
+    private let segmentgpio = [11,8,7,5]
+
     private var displaySequences: [[Int]] = []
 
     init(gpios: [GPIO]) {
@@ -33,6 +35,8 @@ class DigitDisplay {
             gpio.direction = .OUT
         }
         self.gpios = gpios
+        self.currentlyDisplayedNumber = 0
+        self.determineSequence(currentlyDisplayedNumber)
     }
 
     func reset(){
@@ -56,7 +60,18 @@ class DigitDisplay {
             }
             usleep(2000)
         }
-    
+    }
+
+    func switchSegments(s1: Bool, s2: Bool, s3: Bool, s4: Bool){
+        let segBools = [s1,s2,s3,s4]
+        for (i,segBool) in segBools.enumerated() {
+            // segment onn = low = 0 
+            self.displaySequences[i][segmentgpio[i]] = segBool ? 0 : 1
+        } 
+    }
+
+    func switchOff(){
+        self.switchSegments(s1:false, s2:false, s3:false, s4:false)
     }
 
     private func determineSequence(_ num: Int) {
@@ -67,7 +82,6 @@ class DigitDisplay {
         
         self.displaySequences = []
         // 12,9,8,6 (not indexed)
-        let segmentgpio = [11,8,7,5]
         var numStr = String(num)
         let numberOfPrefixedZeros = 4 - numStr.length
         for _ in 1...numberOfPrefixedZeros {

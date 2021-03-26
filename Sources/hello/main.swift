@@ -140,5 +140,7 @@ while signalReceived == 0 {
 // cleanup
 LED.direction = .IN
 btn.clearListeners()
+digitDisplay.switchOff()
+digitDisplay.display()
 print("\ncompleted cleanup of GPIO resources.")
 exit(signalReceived)
