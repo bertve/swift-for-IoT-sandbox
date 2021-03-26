@@ -6,24 +6,24 @@ class DigitDisplay {
     let gpios: [GPIO]
     var currentlyDisplayedNumber = 0 {  
         didSet {
+            print("setted display number: \(currentlyDisplayedNumber)")
             self.determineSequence(currentlyDisplayedNumber)
         }
     }
 
-    private var isDisplaying = false
     private let digitSequences : [Int: [Int]] = 
     //               6x  8x9x   12x --> segment gpios (high = off)
     [   
         0: [1,1,0,1,0,1,1,1,1,1,1,1],
         1: [0,0,0,1,0,1,1,1,1,0,0,1],
         2: [1,1,0,0,1,1,1,1,1,0,1,1],
-        3: [1,1,0,0,1,1,0,1,1,1,1,1],
+        3: [0,1,0,1,1,1,1,1,1,0,1,1],
         4: [0,0,0,1,1,1,1,1,1,1,0,1],
         5: [0,1,0,1,1,1,0,1,1,1,1,1],
         6: [1,1,0,1,1,1,0,1,1,1,1,1],
         7: [0,0,0,1,0,1,1,1,1,0,1,1],
         8: [1,1,0,1,1,1,1,1,1,1,1,1],
-        9: [0,1,1,1,1,1,1,1,1,1,1,1] 
+        9: [0,1,0,1,1,1,1,1,1,1,1,1] 
     ]
  
     private var displaySequences: [[Int]] = []
@@ -41,7 +41,6 @@ class DigitDisplay {
 
     func increment(){
         currentlyDisplayedNumber += 1
-        print("currently displayed: \(currentlyDisplayedNumber)")
     }
 
     func decrement(){
@@ -60,35 +59,29 @@ class DigitDisplay {
     
     }
 
-
     private func determineSequence(_ num: Int) {
         guard num >= 0 && num <= 9999 else {
             reset()
             return 
         }
         
-        self.displaySequences = []  
-        var number = num
-        var digit : Int
-        var rest : Int
-        let segmentgpio = [5,7,8,11]
-        for index in stride(from: 3, to: 0, by: -1){
-            digit = number / (10 * index)
-            rest = digit * (10 * index)
-            if let sequence = self.digitSequences[digit] { 
+        self.displaySequences = []
+        // 12,9,8,6 (not indexed)
+        let segmentgpio = [11,8,7,5]
+        var numStr = String(num)
+        let numberOfPrefixedZeros = 4 - numStr.length
+        for _ in 1...numberOfPrefixedZeros {
+            numStr = "0" + numStr
+        }
+        print("numstr: \(numStr)")
+        for (i,numChar) in numStr.enumerated() {
+            if let digit = Int(String(numChar)),
+                let sequence = self.digitSequences[digit] { 
                 var varSeq = sequence
-                varSeq[segmentgpio[index]] = 0
+                varSeq[segmentgpio[i]] = 0
                 displaySequences.append(varSeq)
             }
-            number -= rest
         }
-
-        if let lastSequence = self.digitSequences[number] {
-            var varSeq = lastSequence
-            varSeq[segmentgpio[0]] = 0
-            displaySequences.append(varSeq)
-        }
-
         print("display seq: \(displaySequences)")
     }
 
