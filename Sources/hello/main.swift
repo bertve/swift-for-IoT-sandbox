@@ -4,6 +4,8 @@ import Glibc
 import Dispatch
 
 // setup exit sig
+// setup exit sig
+// setup exit sig
 var signalReceived: sig_atomic_t = 0
 
 signal(SIGINT) { signal in
@@ -56,12 +58,12 @@ guard let gpioOne = gpios[.P14] else {
     fatalError("Could not init target 14 gpio")
 }
 digitDisplayGPIO.append(gpioOne)
-guard let gpioTwo = gpios[.P2] else {
-    fatalError("Could not init target 2 gpio")
+guard let gpioTwo = gpios[.P16] else {
+    fatalError("Could not init target 16 gpio")
 }
 digitDisplayGPIO.append(gpioTwo)
-guard let gpioThree = gpios[.P3] else {
-    fatalError("Could not init target 3 gpio")
+guard let gpioThree = gpios[.P17] else {
+    fatalError("Could not init target 17 gpio")
 }
 digitDisplayGPIO.append(gpioThree)
 guard let gpioFour = gpios[.P4] else {

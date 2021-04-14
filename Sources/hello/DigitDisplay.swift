@@ -51,6 +51,10 @@ class DigitDisplay {
         currentlyDisplayedNumber -= 1
     }
 
+    func displayNumber(_ number: Int){
+        currentlyDisplayedNumber = number
+    }
+
     func display() {
         for seq in displaySequences {
             var seqIndex = 0
@@ -84,9 +88,12 @@ class DigitDisplay {
         // 12,9,8,6 (not indexed)
         var numStr = String(num)
         let numberOfPrefixedZeros = 4 - numStr.length
-        for _ in 1...numberOfPrefixedZeros {
-            numStr = "0" + numStr
+        if (numberOfPrefixedZeros != 0){
+            for _ in 1...numberOfPrefixedZeros {
+                numStr = "0" + numStr
+            }
         }
+
         print("numstr: \(numStr)")
         for (i,numChar) in numStr.enumerated() {
             if let digit = Int(String(numChar)),
