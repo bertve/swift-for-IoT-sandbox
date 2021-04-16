@@ -121,14 +121,32 @@ btn.onRaising{
     digitDisplay.increment()
 }   
 
+// XML90416
+let i2cs = SwiftyGPIO.hardwareI2Cs(for: .RaspberryPi4)!
+print("i2cs")
+print(i2cs)
+let i2c = i2cs[1]
+let mlx90614 = MLX90614(i2c: i2c)
+mlx90614.detect()
+
+
+Thread.detachNewThread {
+    while true {
+        digitDisplay.display()
+    }
+}
+
+Thread.detachNewThread {
+    while true {
+        print("object temp: \(mlx90614.objectTemp)C°")
+        sleep(1)
+        print("ambient temp: \(mlx90614.ambientTemp)C°")
+        sleep(1)
+    }
+}
 // main loop
 LED.value = 0
 while signalReceived == 0 {
-    Thread.detachNewThread {
-        while true {
-            digitDisplay.display()
-        }
-    }
     //print("set LED to 1")
     LED.value = 1
     //print("LED current val: " + String(LED.value))
